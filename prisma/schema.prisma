@@ -1,0 +1,294 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENTREPRISE - Company / Tenant root
+// ============================================================
+
+model Entreprise {
+  id           String        @id @default(uuid())
+  nom          String
+  adresse      String?
+  telephone    String?
+  email        String?
+  ice          String?
+  logo         String?
+  utilisateurs Utilisateur[]
+  clients      Client[]
+  camions      Camion[]
+  dossiers     Dossier[]
+  chauffeurs   Chauffeur[]
+  factures     Facture[]
+  charges      Charge[]
+  permissions  UserPermission[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+// ============================================================
+// UTILISATEUR - System users
+// ============================================================
+
+model Utilisateur {
+  id           String     @id @default(uuid())  // ← MODIFIÉ : ajout @default(uuid())
+  nom          String?                           // ← NOUVEAU : nom affiché
+  email        String
+  password     String                            // ← NOUVEAU : hash bcrypt
+  role         String     @default("STAFF")
+  specialite   String?
+  entrepriseId String
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id])
+  clientId     String?
+  client       Client?    @relation(fields: [clientId], references: [id])
+  accounts     Account[]                          // ← NOUVEAU : relation NextAuth
+  sessions     Session[]                          // ← NOUVEAU : relation NextAuth
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  passwordChangedAt DateTime?
+  roleChangedAt     DateTime?
+  permissionsChangedAt DateTime?
+  passwordResetTokens PasswordResetToken[]
+  permissions        UserPermission[]
+
+  @@unique([email, entrepriseId])
+}
+
+// ============================================================
+// USER PERMISSION - Granular per-user permissions (join table)
+// ============================================================
+// Entreprise admins have implicit full access (no rows stored).
+// Staff users get explicit rows via DEFAULT_STAFF_PERMISSIONS.
+
+model UserPermission {
+  id           String       @id @default(uuid())
+  userId       String
+  permission   String
+  entrepriseId String
+  user         Utilisateur  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entreprise   Entreprise   @relation(fields: [entrepriseId], references: [id])
+  createdAt    DateTime     @default(now())
+
+  @@unique([userId, permission])
+  @@index([entrepriseId])
+}
+
+// ============================================================
+// NEXT AUTH - Account / Session / VerificationToken
+// ============================================================
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              Utilisateur @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         Utilisateur @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================================
+// CLIENT - Customers
+// ============================================================
+
+model Client {
+  id           String        @id @default(uuid())
+  nom          String
+  telephone    String?
+  adresse      String?
+  ice          String?
+  clientReference String?
+  entrepriseId String
+  entreprise   Entreprise    @relation(fields: [entrepriseId], references: [id])
+  utilisateurs Utilisateur[]
+  dossiers     Dossier[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+// ============================================================
+// CHAUFFEUR - Drivers
+// ============================================================
+
+model Chauffeur {
+  id             String     @id @default(uuid())
+  nom            String
+  telephone      String
+  cin            String
+  type           String     @default("INTERNE")
+  camionExterne  String?
+  actif          Boolean    @default(true)
+  entrepriseId   String
+  entreprise     Entreprise @relation(fields: [entrepriseId], references: [id])
+  camionId       String?    @unique
+  camion         Camion?    @relation(fields: [camionId], references: [id])
+  dossiers       Dossier[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@unique([cin, entrepriseId])
+}
+
+// ============================================================
+// CAMION - Trucks/Vehicles
+// ============================================================
+
+model Camion {
+  id                       String     @id @default(uuid())
+  matricule                String
+  type                     String     @default("1")
+  marque                   String?
+  annee                    Int?
+  assuranceCirculation     DateTime?
+  dateVisiteTechnique      DateTime?
+  dateAssuranceMarchandise DateTime?
+  entrepriseId             String
+  entreprise               Entreprise @relation(fields: [entrepriseId], references: [id])
+  chauffeur                Chauffeur?
+  dossiers                 Dossier[]
+  createdAt                DateTime   @default(now())
+  updatedAt                DateTime   @updatedAt
+
+  @@unique([matricule, entrepriseId])
+}
+
+// ============================================================
+// DOSSIER - Transport operations
+// ============================================================
+
+model Dossier {
+  id              String     @id @default(uuid())
+  reference       String
+  statut          String     @default("OUVERT")
+  dateOperation   DateTime?
+  lieuDepart      String
+  lieuArrivee     String
+  prixVente       Float
+  prixAchat       Float?
+  tvaRate         Int        @default(20)
+  typeVehicule    String?
+  clientId        String
+  client          Client     @relation(fields: [clientId], references: [id])
+  camionId        String?
+  camion          Camion?    @relation(fields: [camionId], references: [id])
+  camionExterne   String?
+  chauffeurId     String
+  chauffeur       Chauffeur  @relation(fields: [chauffeurId], references: [id])
+  charges         Charge[]
+  facture         Facture?
+  entrepriseId    String
+  entreprise      Entreprise @relation(fields: [entrepriseId], references: [id])
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@index([chauffeurId])
+  @@index([camionId])
+  @@index([statut])
+  @@unique([reference, entrepriseId])
+}
+
+// ============================================================
+// CHARGE - Expense charges per dossier
+// ============================================================
+
+model Charge {
+  id            String          @id @default(uuid())
+  type          String
+  montant       Float
+  commentaire   String?
+  categorie     String          @default("DOSSIER")
+  submissionKey String?         @unique
+  dossierId     String?
+  dossier       Dossier?        @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  entrepriseId  String?
+  entreprise    Entreprise?     @relation(fields: [entrepriseId], references: [id])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+// ============================================================
+// FACTURE - Auto-generated invoices
+// ============================================================
+
+model Facture {
+  id            String     @id @default(uuid())
+  reference     String
+  montantTotal  Float
+  tva           Float      @default(0)
+  montantHT     Float      @default(0)
+  dossierId     String     @unique
+  dossier       Dossier    @relation(fields: [dossierId], references: [id], onDelete: Cascade)
+  entrepriseId  String
+  entreprise    Entreprise @relation(fields: [entrepriseId], references: [id])
+  dateFacture   DateTime?
+  createdAt     DateTime   @default(now())
+
+  @@unique([reference, entrepriseId])
+}
+
+// ============================================================
+// AUDIT LOG - Durable audit trail (no FK on purpose)
+// ============================================================
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  entrepriseId String?
+  userId       String?
+  action       String
+  module       String
+  targetType   String?
+  targetId     String?
+  details      String?
+  createdAt    DateTime @default(now())
+
+  @@index([entrepriseId, createdAt])
+  @@index([userId, createdAt])
+  @@index([module, targetId])
+  @@index([action])
+}
+
+// ============================================================
+// PASSWORD RESET TOKEN - Secure password reset flow
+// ============================================================
+
+model PasswordResetToken {
+  id        String      @id @default(uuid())
+  userId    String
+  user      Utilisateur @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime    @default(now())
+
+  @@index([userId])
+  @@index([tokenHash])
+}

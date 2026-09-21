@@ -1,0 +1,35 @@
+/*
+ * Relevé de Factures - Print / Save-as-PDF (A4 landscape)
+ * Imported only by /dashboard/factures/releve, so it does not affect
+ * the invoice print (which keeps A4 portrait from globals.css).
+ */
+@media print {
+  @page {
+    size: A4 landscape !important;
+    margin: 12mm;
+  }
+
+  .releve-print {
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .releve-print .overflow-auto,
+  .releve-print [class*="overflow-auto"] {
+    overflow: visible !important;
+  }
+
+  .releve-print table {
+    width: 100% !important;
+    page-break-inside: auto;
+  }
+
+  .releve-print tr {
+    page-break-inside: avoid;
+  }
+}
