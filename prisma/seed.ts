@@ -52,7 +52,7 @@ async function main() {
     data: {
       id: "admin-user-2",
       nom: "Admin Transport Express",
-      email: "admin@tms.com",
+      email: "admin2@tms.com",
       password: hashedPassword,
       role: "ENTREPRISE_ADMIN",
       entrepriseId: entreprise2.id,
