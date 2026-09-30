@@ -18,13 +18,12 @@ import {
   Receipt,
   FileText,
   ClipboardList,
-  Shield,
+  Settings,
   LogOut,
   Menu,
   X,
   ChevronsLeft,
   ChevronsRight,
-  UserCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -70,13 +69,8 @@ const navGroups: NavGroup[] = [
     items: [{ title: "Clients", href: "/dashboard/clients", icon: Users, permission: "clients.view" }],
   },
   {
-    label: "Administration",
-    permission: "users.view",
-    items: [{ title: "Utilisateurs", href: "/dashboard/utilisateurs", icon: Shield }],
-  },
-  {
-    label: "Compte",
-    items: [{ title: "Mon profil", href: "/dashboard/profil", icon: UserCircle }],
+    label: "Paramètres",
+    items: [{ title: "Paramètres", href: "/dashboard/parametres", icon: Settings }],
   },
 ];
 

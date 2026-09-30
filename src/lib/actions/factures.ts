@@ -52,7 +52,7 @@ export async function getFactureById(id: string) {
             charges: true,
           },
         },
-        entreprise: true,
+        entreprise: { include: { config: true } },
       },
     });
     if (!facture) return { success: false, error: "Facture non trouvée", data: null };

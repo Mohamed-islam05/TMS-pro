@@ -174,7 +174,7 @@ export async function updateUserRole(data: { userId: string; role: string }) {
       details: { role: parsed.data.role },
     });
 
-    revalidatePath("/dashboard/utilisateurs");
+    revalidatePath("/dashboard/parametres/utilisateurs");
     return { success: true, message: "Rôle mis à jour avec succès" };
   } catch (error) {
     console.error("Error updating user role:", safeLogError(error));
@@ -624,7 +624,7 @@ data: { permissionsChangedAt: new Date() },
       details: { permissions: finalPermissions },
     });
 
-    revalidatePath("/dashboard/utilisateurs");
+    revalidatePath("/dashboard/parametres/utilisateurs");
     return { success: true, message: "Permissions mises à jour avec succès" };
   } catch (error) {
     console.error("Error updating permissions:", safeLogError(error));

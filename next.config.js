@@ -3,6 +3,25 @@ const nextConfig = {
   experimental: {
     instrumentationHook: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/dashboard/profil",
+        destination: "/dashboard/parametres/profil",
+        permanent: true,
+      },
+      {
+        source: "/dashboard/settings/entreprise",
+        destination: "/dashboard/parametres/entreprise",
+        permanent: true,
+      },
+      {
+        source: "/dashboard/utilisateurs",
+        destination: "/dashboard/parametres/utilisateurs",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

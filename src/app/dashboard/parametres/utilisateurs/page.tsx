@@ -38,7 +38,7 @@ const userFormSchema = z.object({
     .min(2, "Le nom doit contenir au moins 2 caractères")
     .max(100, "Le nom ne doit pas dépasser 100 caractères"),
   email: z.string().email("Email invalide"),
-  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
   role: z.enum(["ENTREPRISE_ADMIN", "STAFF"], {
     errorMap: () => ({ message: "Rôle invalide" }),
   }),

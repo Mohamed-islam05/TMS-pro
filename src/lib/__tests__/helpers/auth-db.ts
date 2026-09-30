@@ -13,6 +13,7 @@ export async function clearAllData(): Promise<void> {
     prisma.session.deleteMany(),
     prisma.verificationToken.deleteMany(),
     prisma.auditLog.deleteMany(),
+    prisma.entrepriseConfig.deleteMany(),
     prisma.charge.deleteMany(),
     prisma.facture.deleteMany(),
     prisma.dossier.deleteMany(),

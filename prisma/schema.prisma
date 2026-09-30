@@ -27,8 +27,26 @@ model Entreprise {
   factures     Facture[]
   charges      Charge[]
   permissions  UserPermission[]
+  config       EntrepriseConfig?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+}
+
+// ============================================================
+// ENTREPRISE CONFIG - Per-tenant company settings & branding
+// ============================================================
+// 1:1 with Entreprise. Holds the identity, logo, invoice footer
+// and the invoice template variant chosen by the tenant.
+
+model EntrepriseConfig {
+  id           String     @id @default(uuid())
+  logoUrl      String?
+  footerText   String?
+  templateId   String     @default("classic")
+  entrepriseId String     @unique
+  entreprise   Entreprise @relation(fields: [entrepriseId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 // ============================================================

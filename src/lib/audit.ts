@@ -14,7 +14,8 @@ export type AuditModule =
   | "charges"
   | "camions"
   | "chauffeurs"
-  | "clients";
+  | "clients"
+  | "settings";
 
 export interface AuditEntry {
   action: string;
