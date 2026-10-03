@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ============================================================
@@ -227,6 +228,10 @@ model Dossier {
   entreprise      Entreprise @relation(fields: [entrepriseId], references: [id])
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
+  // TECH DEBT (Phase 24B): money fields stay `Float` on purpose to avoid app
+  // changes. On PostgreSQL, Float maps to DOUBLE PRECISION (same 8-byte
+  // precision as SQLite REAL). Revisit Decimal() money handling in a
+  // dedicated precision phase if exact decimal accounting is ever required.
 
   @@index([chauffeurId])
   @@index([camionId])
